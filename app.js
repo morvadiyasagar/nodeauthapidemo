@@ -11,7 +11,7 @@ const app = express();
 const connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
-    password: '',
+    password: 'test',
     database: 'noderestapi'
 });
 connection.connect(function(error) {
@@ -180,4 +180,6 @@ function verifyToken(req, res, next) {
 }
 
 
-app.listen(5002, () => console.log('Server started on port 5000'));
+
+app.listen(5000, () => console.log('Server started on port 5000'));
+
