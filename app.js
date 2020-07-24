@@ -2,6 +2,7 @@ const express = require('express');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql');
 var productsRouter = require('./routes/vechical');
+var config = require('./config');
 
 const bodyParser = require('body-parser');
 var requestIp = require('request-ip');
@@ -9,17 +10,17 @@ var requestIp = require('request-ip');
 const app = express();
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: 'test',
-    database: 'noderestapi'
+    host: config.database.host,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.db
 });
 connection.connect(function(error) {
     if (!!error) console.log(error);
     else console.log('Database Connected!');
 });
 
-app.use('/vechical', verifyToken, productsRouter);
+app.use('/vehical', verifyToken, productsRouter);
 
 app.get('/api', (req, res) => {
     res.json({
@@ -55,7 +56,7 @@ app.post('/api/login', (req, res) => {
 
     if (username == "" && password == "") {
         res.json({
-            msg: 'User Name Password Reuire',
+            msg: 'User Name & Password Reuired',
             user: '',
             token: '',
 

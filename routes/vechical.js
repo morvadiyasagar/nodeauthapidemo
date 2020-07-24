@@ -7,15 +7,16 @@ var cookies = require('cookie-parser');
 router.use(cookies());
 const https = require('https');
 var requestIp = require('request-ip');
-
+const { isNullOrUndefined } = require('util');
+var config = require('../config');
 
 router.use(bodyParser.json()); // for parsing application/json
 
 const connection = mysql.createConnection({
-    host: 'localhost',
-    user: 'root',
-    password: '',
-    database: 'noderestapi'
+    host: config.database.host,
+    user: config.database.user,
+    password: config.database.password,
+    database: config.database.db
 });
 connection.connect(function(error) {
     if (!!error) console.log(error);
@@ -24,157 +25,79 @@ connection.connect(function(error) {
 /* GET users listing. */
 
 
-/*post method for create product*/
-router.post('/create', function(req, res, next) {
-
-
-
+/*post method for to get vehicle info*/
+router.post('/vehicle_info', function(req, res) {
 
     var list = [];
+    var db_data = [];
+    //fetch data from request parameter
+    vehicle_list = req.body.vechicalno;
+    
+    let ret_array = {};
+    var pro_work = new Promise((resolve,reject)=>{
+        var sql1 = 'SELECT * FROM ??';
+        var tbl = 'vechicalinfo';
 
-    mystring = req.body.vechicalno.replace('[', '');
-    mystring = mystring.replace(']', '');
-    array = mystring.split(",");
-
-    var home_url = 'https://parivahan.gov.in/rcdlstatus/';
-    var post_url = 'https://parivahan.gov.in/rcdlstatus/vahan/rcDlHome.xhtml';
-
-
-    //array[0].substring(0,3);
-    first = "MH02CL";
-    second = "0555";
-    var bar = new Promise((resolve, reject) => {
-
-        for (var i = 0; i < array.length; i++) {
-
-            var vechicalno = array[i].substring(1, array[i].length - 1);
-
-
-            var sql1 = 'SELECT * FROM ?? WHERE vechical_no = ?';
-            var tbl = 'vechicalinfo';
-
-            var query = connection.query(sql1, [tbl, vechicalno], (err, results, fileds) => {
-                console.log(results);
-                if (err) {
-                    console.log(err);
-                } else {
-
-
-                    cnt = results.length;
-
-
-                    if (cnt > 0) {
-                        if (results[0].company == "Tata") {
-                            var rsult = {};
-                            rsult['vechical_no'] = results[0].vechical_no;
-                            rsult['data'] = 'Not Allowed';
-
-                            list.push(rsult);
-
-                        } else {
-                            var rsult = {};
-                            rsult['vechical_no'] = results[0].vechical_no;
-                            rsult['chase_no'] = results[0].chase_no;
-                            rsult['company'] = results[0].company;
-                            rsult['model'] = results[0].model;
-                            list.push(rsult);
-
+        var query = connection.query(sql1, [tbl], (err, results, fileds) => {
+            // console.log(query);
+            if (err) {
+                console.log(err);
+            } else {
+                results.forEach(element => {
+                    console.log(element);
+                    // tmp = [];
+                    db_data[element.vechical_no] = {
+                        "vechical_no":element.vechical_no,
+                        "company":element.company,
+                        "model":element.model,
+                        "chassis_no":element.chase_no,
+                    };
+                });
+                console.log('db_data',db_data);
+                vehicle_list.forEach(vehicle_no => {
+                    console.log(isNullOrUndefined(db_data[vehicle_no]));
+                    if(!isNullOrUndefined(db_data[vehicle_no])){
+                        console.log('comapany info of',vehicle_no,db_data[vehicle_no]['company']);
+                        if(db_data[vehicle_no]['company'] == "Tata"){
+                            ret_array[vehicle_no] = {"status":"error","msg":"Not allowed"};
+                        }else{
+                            ret_array[vehicle_no] = db_data[vehicle_no];
                         }
-                        console.log("list", list);
-
-
-
-                    } else {
-                        var rsult = {};
-                        rsult['vechical_no'] = vechicalno;
-                        rsult['data'] = 'Data Not Found';
-
-                        list.push(rsult);
+                    }else{
+                        ret_array[vehicle_no] = {"status":"error","msg":"vehicle inforamtion available"};
                     }
-                }
-            });
-            if (i == array.length - 1)
-                resolve();
-        }
-        console.log('for list', list);
-    });
-
-    bar.then(() => {
-        console.log("bar then", list);
-        res.json({
-            msg: list
+                });
+                console.log('ret val: ',ret_array);
+                resolve(ret_array);
+            }
         });
     });
-
-    return res.send(list);
-
-    console.log('till here')
-        // const request = require('request');
-
-
-
-    // request(home_url, function(error, response, body) {
-    //     console.error('error:', error); // Print the error if one occurred
-    //     console.log('statusCode:', response && response.statusCode); // Print the response status code if a response was received
-    //     console.log('body:', body); // Print the HTML for the Google homepage.
-    //     res.json({
-    //         message: response
-    //     });
-
-    // });
-
-    // let data = '';
-    // let viewstate = '';
-    // var request = https.get(home_url, (res) => {
-    //     console.log('statusCode:', res.statusCode);
-    //     console.log('headers:', res.headers);
-    //     console.log('cookies:', res.Cookie);
-
-    //     res.on('data', (d) => {
-
-    //         process.stdout.write(d);
-    //         // soup = BeautifulSoup(d, 'html.parser')
-
-    //         // viewstate = soup.select('input[name="javax.faces.ViewState"]')[0]['value']
-
-    //     });
-    //     console.log(viewstate);
-
-    // }).on('error', (e) => {
-    //     console.error(e);
-    // });
-
-
-
-
-
-
-
-
-
+    pro_work.then((r)=>{
+        console.log('from then ret ',ret_array);
+        ret_array = r;
+       console.log(typeof(ret_array));
+        res.json(r);
+        console.log('json',ret_array);
+    });
 });
 
-router.post('/subscribe', function(req, res, next) {
+router.post('/subscribe', function(req, res) {
     var array = [];
     var opration = [];
     var url = "";
-    var list = [];
-    mystring = req.body.vechicalno.replace('[', '');
-    mystring = mystring.replace(']', '');
-    mystring = mystring.replace("'", "");
+    var list = {};
+    mystring = req.body.vechicalno;
+    
 
-    opration = req.body.opration.replace('[', '');
-    opration = opration.replace(']', '');
-    opration = opration.replace("'", "");
-    console.log(mystring, opration);
+    opration = req.body.opration;
+    
     var clientIp = requestIp.getClientIp(req);
     const bearerHeader = req.headers['authorization'];
     const bearer = bearerHeader.split(' ');
     // Get token from array
     const bearerToken = bearer[1];
 
-    array = mystring.split(",");
-    opration = opration.split(",");
+    array = mystring;
     url = req.body.url;
 
     var sql = `INSERT INTO subscribe_log (requesting_ip, requested_token,number_list,opration_list,url) VALUES ("${clientIp}", "${bearerToken}", "${req.body.vechicalno}","${req.body.opration}","${url}")`;
