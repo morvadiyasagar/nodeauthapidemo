@@ -1,8 +1,10 @@
 const express = require('express');
 const jwt = require('jsonwebtoken');
 const mysql = require('mysql');
-const bodyParser = require('body-parser');
+var productsRouter = require('./routes/vechical');
 
+const bodyParser = require('body-parser');
+var requestIp = require('request-ip');
 
 const app = express();
 
@@ -17,6 +19,7 @@ connection.connect(function(error) {
     else console.log('Database Connected!');
 });
 
+app.use('/vechical', verifyToken, productsRouter);
 
 app.get('/api', (req, res) => {
     res.json({
@@ -45,9 +48,19 @@ app.post('/api/posts', verifyToken, (req, res) => {
 
 app.post('/api/login', (req, res) => {
     // Mock user
-
+    var clientIp = requestIp.getClientIp(req);
+    var successd = 0;
     const username = req.body.username;
     const password = req.body.password;
+
+    if (username == "" && password == "") {
+        res.json({
+            msg: 'User Name Password Reuire',
+            user: '',
+            token: '',
+
+        });
+    }
 
     var sql = 'SELECT * FROM ?? WHERE username = ? AND password = ?';
     var tbl = 'users';
@@ -55,20 +68,31 @@ app.post('/api/login', (req, res) => {
         console.log(results);
         if (err) {
             res.json({
-                title: err,
-
+                msg: err,
+                user: '',
+                token: '',
             });
         } else {
             const user = results;
             if (user != "") {
+                successd = 1;
+
                 jwt.sign({ user }, 'secretkey', { expiresIn: '24h' }, (err, token) => {
                     // res.json({
                     //     token
                     // });
 
                     if (user != "") {
+
+                        var sql = `INSERT INTO log_master (requesting_ip, username,password,success_fail,token) VALUES ("${clientIp}", "${username}", "${password}","${successd}","${token}")`;
+                        connection.query(sql, function(err, result) {
+                            if (err) {
+                                res.status(500).send({ error: 'Something failed!' })
+                            }
+
+                        })
                         res.json({
-                            title: 'Login Success Fully !!!',
+                            msg: 'Login Success Fully !!!',
                             user: results,
                             token
                         });
@@ -78,9 +102,19 @@ app.post('/api/login', (req, res) => {
                 });
                 // res.json({ 'status': 1, 'data': results });
             } else {
-                res.json({
-                    title: 'Login Not  Success Fully !!!',
+                successd = 0;
+                var token = '';
+                var sql = `INSERT INTO log_master (requesting_ip, username,password,success_fail,token) VALUES ("${clientIp}", "${username}", "${password}","${successd}","${token}")`;
+                connection.query(sql, function(err, result) {
+                    if (err) {
+                        res.status(500).send({ error: 'Something failed!' })
+                    }
 
+                })
+                res.json({
+                    msg: 'User Not Found !!!',
+                    user: '',
+                    token: '',
                 });
             }
         }
@@ -146,4 +180,6 @@ function verifyToken(req, res, next) {
 }
 
 
+
 app.listen(5000, () => console.log('Server started on port 5000'));
+
