@@ -1,0 +1,62 @@
+
+tb:call_log_detalis
+
+CREATE TABLE `call_log_detalis` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `requesting_ip` varchar(255) NOT NULL,
+ `requested_token` varchar(255) NOT NULL,
+ `no_url` varchar(10) NOT NULL,
+ `date_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=latin1
+
+
+tb:log_master
+
+CREATE TABLE `log_master` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `requesting_ip` varchar(255) NOT NULL,
+ `username` varchar(100) NOT NULL,
+ `password` varchar(100) NOT NULL,
+ `success_fail` int(1) NOT NULL,
+ `token` varchar(255) NOT NULL,
+ `datetime` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1
+
+
+tb:subscribe_detalis
+CREATE TABLE `subscribe_detalis` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `vechical_no` varchar(30) NOT NULL,
+ `opration` varchar(255) NOT NULL,
+ `url` varchar(255) NOT NULL,
+ `add_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ `status` int(1) NOT NULL DEFAULT '1',
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=latin1
+
+
+tb:subscribe_log
+CREATE TABLE `subscribe_log` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `requesting_ip` varchar(255) NOT NULL,
+ `requested_token` varchar(255) NOT NULL,
+ `number_list` varchar(255) NOT NULL,
+ `opration_list` varchar(255) NOT NULL,
+ `url` varchar(255) NOT NULL,
+ `add_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=latin1
+
+
+tb:vechicalinfo
+
+CREATE TABLE `vechicalinfo` (
+ `id` int(11) NOT NULL AUTO_INCREMENT,
+ `vechical_no` varchar(100) NOT NULL,
+ `chase_no` varchar(100) NOT NULL,
+ `company` varchar(100) NOT NULL,
+ `model` varchar(100) NOT NULL,
+ PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=latin1
