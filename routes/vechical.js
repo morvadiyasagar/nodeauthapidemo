@@ -64,7 +64,7 @@ router.post('/vehicle_info', function(req, res) {
                             ret_array[vehicle_no] = db_data[vehicle_no];
                         }
                     }else{
-                        ret_array[vehicle_no] = {"status":"error","msg":"vehicle inforamtion available"};
+                        ret_array[vehicle_no] = {"status":"error","msg":"vehicle inforamtion not available"};
                     }
                 });
                 console.log('ret val: ',ret_array);
@@ -106,10 +106,10 @@ router.post('/subscribe', function(req, res) {
             res.status(500).send({ error: 'Something failed!' })
         }
 
-    })
+    });
     var bar = new Promise((resolve, reject) => {
         var i = 0;
-
+        console.log('array lenght', array.length);
         for (i = 0; i < array.length; i++) {
 
             for (var j = 0; j < opration.length; j++) {
@@ -128,45 +128,48 @@ router.post('/subscribe', function(req, res) {
 
                 }
 
-                var sql1 = 'SELECT * FROM ?? WHERE vechical_no = ? AND opration = ?';
-                var tbl = 'subscribe_detalis';
-                var query = connection.query(sql1, [tbl, ayy, opp], (err, results, fileds) => {
-                    console.log(results);
-                    if (err) {
-                        console.log(err);
-                    } else {
+                // var sql1 = 'SELECT * FROM ?? WHERE vechical_no = ? AND opration = ?';
+                // var tbl = 'subscribe_detalis';
+                // var query = connection.query(sql1, [tbl, ayy, opp], (err, results, fileds) => {
+                //     console.log('query output' , results);
+                //     if (err) {
+                //         console.log(err);
+                //     } else {
 
 
-                        cnt = results.length;
+                        // cnt = results.length;
 
-                        if (cnt > 0) {
-                            console.log('from here' + results[0].url);
-                            var rsult = {};
-                            rsult['url'] = results[0].url;
-                            rsult['opration'] = opp;
-                            rsult['vechicalno'] = ayy;
-                            list.push(rsult);
+                        // if (cnt > 0) {
+                        //     console.log('from here' + results[0].url);
+                        //     var rsult = {};
+                        //     rsult['url'] = results[0].url;
+                        //     rsult['opration'] = opp;
+                        //     rsult['vechicalno'] = ayy;
+                        //     list.push(rsult);
 
-                            var rsult = {};
-                            rsult['url'] = url;
-                            rsult['opration'] = opp;
-                            rsult['vechicalno'] = ayy;
-                            list.push(rsult);
-                            console.log("sdfd", list.length, list);
-                        } else {
+                        //     var rsult = {};
+                        //     rsult['url'] = url;
+                        //     rsult['opration'] = opp;
+                        //     rsult['vechicalno'] = ayy;
+                        //     list.push(rsult);
+                        //     console.log("sdfd", list.length, list);
+                        // } else {
 
                             var sql = `INSERT INTO subscribe_detalis (vechical_no, opration, url) VALUES ("${ayy}", "${opp}", "${url}")`;
                             connection.query(sql, function(err, result) {
                                 if (err) {
                                     res.status(500).send({ error: 'Something failed!' })
+                                }else{
+                                    console.log('insert result',result);
                                 }
 
-                            })
-                        }
-                    }
-                })
+                            });
+                        // }
+                    // }
+                // });
             }
-
+            if(i==array.length - 1)
+            resolve();
         }
     });
 
@@ -174,10 +177,10 @@ router.post('/subscribe', function(req, res) {
         console.log("form listinfo");
         console.log("finallist" + list);
         // if (i == array.length) {
-        console.log('list' + i)
+        // console.log('list' + i)
         res.json({
             msg: "Successfully Subscribe",
-            data: list
+            // data: list
         });
         // } else {
         //     res.json({

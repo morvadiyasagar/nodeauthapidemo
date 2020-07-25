@@ -20,7 +20,7 @@ connection.connect(function(error) {
     else console.log('Database Connected!');
 });
 
-app.use('/vehical', verifyToken, productsRouter);
+app.use('/vehicle', verifyToken, productsRouter);
 
 app.get('/api', (req, res) => {
     res.json({

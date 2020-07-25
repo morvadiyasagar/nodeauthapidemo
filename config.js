@@ -2,7 +2,7 @@ var config = {
     database: {
         host:     'localhost',
         user:     'root',
-        password: 'test',      
+        password: "test",//'NlgGdOOX79XIvMts',//test      
         port:     3306,
 		db:       'noderestapi'
 	},
